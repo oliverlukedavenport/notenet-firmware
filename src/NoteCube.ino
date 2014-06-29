@@ -9,17 +9,25 @@ BreatheLight breatheLight;
 NoteLight noteLight;
 FlashingLight flashingLight;
 
+int func(String);
+int stringToInt(String);
+
+/* "exposed" functions */
+int ping(String);
+int setLED(String);
+int setLode(String);
+int setLED(String);
+int setFlashRate(String);
+int setBreatheRate(String);
+
 void setup() {
-    Spark.function("setLED", setLED);
-    Spark.function("setMode", setMode);
-    Spark.function("setFlashRate", setFlashRate);
-    Spark.function("setBreatheRate", setBreatheRate);
-    Spark.function("ping", ping);
-    //Serial.begin(9600);
+    Spark.function("func", func);
+    
     settings = Settings();
     noteLight = NoteLight();
     breatheLight = BreatheLight();
     flashingLight = FlashingLight();
+    
     RGB.control(true);
 }
 
@@ -33,7 +41,7 @@ void loop() {
     }
 }
 
-int setMode(String args){
+int setMode(String args) {
     if (args == "solid"){
         settings.setMode(1);
     } else if (args == "flashing") {
@@ -44,7 +52,7 @@ int setMode(String args){
     return 0;
 }
 
-int setLED(String args){
+int setLED(String args) {
     if (args != NULL){
         char hex[8];
         args.toCharArray(hex, 8);
@@ -58,24 +66,39 @@ int setLED(String args){
     return 0;
 }
 
-int setFlashRate(String args){
+int setFlashRate(String args) {
     int range = stringToInt(args);
     flashingLight.setFlashRate(range);
     return 0;
 }
 
-int setBreatheRate(String args){
+int setBreatheRate(String args) {
     int range = stringToInt(args);
     breatheLight.setBreatheRate(range);
     return 0;
 }
 
-int stringToInt(String args){
-    char msg[256];
-    args.toCharArray(msg, 256);
-    int range = atoi(msg);
-    return range;
-}
-int ping(String args){
+int ping(String args) {
     return 0;
+}
+
+int stringToInt(String str) {
+    char ch[256];
+    str.toCharArray(ch, 256);
+    return atoi(ch);
+}
+
+/* prototype -- proof of concept function. development use only */
+int func(String args) {
+    int i = args.indexOf("|");
+    String func_name = args.substring(0, i);
+    String argv = args.substring(i + 1);
+    
+    if(func_name.equals("setLED")) return setLED(argv);
+    if(func_name.equals("setMode")) return setMode(argv);
+    if(func_name.equals("setFlashRate")) return setFlashRate(argv);
+    if(func_name.equals("setBreatheRate")) return setBreatheRate(argv);
+    if(func_name.equals("ping")) return ping(argv);
+    
+    return 0x77358008; // ha
 }
